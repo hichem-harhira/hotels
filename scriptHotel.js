@@ -38,7 +38,8 @@ var adresse = document.getElementById("adresse").value;
             pwd: password,
             tel: telNumber,
             adresse : adresse,
-            role: category
+            role: category,
+            statue : "wait",
         };
 
         const users = JSON.parse(localStorage.getItem("users") || "[]");
@@ -158,31 +159,65 @@ function searchById(key,id) {
     }
 
 
-function login() {
+
+ function addAdmin() {
+        const adminUsers = [
+            { id: "1", firstName: "Admin1", lastName: "Admin1", email: "Admin@gmail.com", pwd: "Admin1@admin123", tel: "98774526", role: "Admin" },
+            { id: "2", firstName: "Admin2", lastName: "Admin2", email: "Admin@gmail.com", pwd: "Admin2@admin123", tel: "29700332", role: "Admin" },
+            { id: "3", firstName: "Admin3", lastName: "Admin3", email: "Admin@gmail.com", pwd: "Admin3@admin123", tel: "29700369", role: "Admin" },
+        ];
+    
+        const users = JSON.parse(localStorage.getItem("users") || "[]");
+        users.push(...adminUsers);
+    
+        localStorage.setItem("users", JSON.stringify(users));
+        localStorage.setItem("adminAdded", true);
+    }
+    
+    function login() {
         const email = document.getElementById("email").value;
         const pwd = document.getElementById("pwd").value;
     
+        // Fetch users from localStorage
         const users = JSON.parse(localStorage.getItem("users") || "[]");
+    
+        // Find the user matching email and password
         const foundUser = users.find(user => user.email === email && user.pwd === pwd);
     
         if (foundUser) {
+            // Clear previous error messages
             clearError("loginError");
+    
+            // Additional validation for the "Owner" role
+            if (foundUser.role === "Owner" && foundUser.statue !== "Confirmed") {
+                // Owner not yet accepted
+                showError("loginError", "Your account has not been confirmed yet.");
+                return;
+            }
+    
+            // Save the connected user ID in localStorage
             localStorage.setItem("connectedUser", foundUser.id);
     
+            // Redirect based on the user's role
             switch (foundUser.role) {
                 case "Guest":
-                    location.replace("home.html");
+                    location.replace("./home.html");
                     break;
                 case "Owner":
-                    location.replace("home.html");
-                case "Admin":
-                    location.replace("home.html");
+                    location.replace("./home.html");
                     break;
+                case "Admin":
+                    location.replace("./home.html");
+                    break;
+                default:
+                    showError("loginError", "Invalid user role.");
             }
         } else {
-            showError("loginError", "Failed");
+            // If no user matches the credentials, show an error
+            showError("loginError", "Incorrect email or password.");
         }
     }
+    
 // add admin
 function navbarSupportedContent() {
 
@@ -199,8 +234,8 @@ function navbarSupportedContent() {
 
                                 <nav class="mainmenu">
                                 <ul>
-                                    <li> <a> Welcome ${user.firstName}</a> </li>
-                                    <li class="active"><a href="./home.html">Home</a></li>
+                                   
+                                    <li><a href="./home.html">Home</a></li>
                                     <li><a href="./rooms.html">Rooms</a></li>
                                     <li><a href="./sign.html">Check Reserved </a></li>          
                                     <li><a href="./blog.html">News</a></li>
@@ -214,7 +249,7 @@ function navbarSupportedContent() {
     
                                 <nav class="mainmenu">
                                 <ul>
-                                    <li><a> Welcome ${user.firstName}</a></li>                           
+                                                            
                                     <li class="active"><a href="./home.html">Home</a></li>
                                     <li><a href="./mansion.html">Add Mansion/Rooms</a></li>
                                     <li><a href="./sign.html">Reserved Rooms</a></li>       
@@ -229,9 +264,9 @@ function navbarSupportedContent() {
     
                                 <nav class="mainmenu">
                                 <ul>
-                                    <li><a> Welcome ${user.firstName}</a></li>                           
+                                                             
                                     <li class="active"><a href="./home.html">Home</a></li>
-                                    <li><a href="./rooms.html">Dashboard Palace</a></li>     
+                                    <li><a href="./dashboardPalace.html">Dashboard Palace</a></li>     
                                     <li><a href="./blog.html">News</a></li>
                                     <li><a href="./contact.html">Contact</a></li>
                                     <li class="nav-item"><button type="button" class="btn btn-danger" onclick="Logout()"> Logout </button></li> 
@@ -245,11 +280,11 @@ function navbarSupportedContent() {
         navbarSupportedContent = navbarSupportedContent + `
                                 <nav class="mainmenu">
                                 <ul>
-                                    <li> Welcome Guest </li>
+                                    
                                     <li class="active"><a href="./home.html">Home</a></li>
                                     <li><a href="./rooms.html">Rooms</a></li>
-                                    <li><a href="sign.html">Check Reserved </a></li>
-                                    <li><a href="login.html">Log in</a></li>     
+                                    <li><a href="./sign.html">Sign Up </a></li>
+                                    <li><a href="./login.html">Log in</a></li>     
                                     <li><a href="./blog.html">News</a></li>
                                     <li><a href="./contact.html">Contact</a></li>
                                     <li class="nav-item"><button type="button" class="btn btn-danger" onclick="Logout()"> Logout </button></li> 
@@ -572,102 +607,152 @@ function validatePriceInput(price) {
 }
 
 function dashboardMansion() {
-
     var mansion = getFromLocalStorage("mansions");
-
-
     var connectedUser = getFromLocalStorage("connectedUser");
-    
-    
-    var addroom =  `
+
+    var addroom = `
     <h2 class="text-center my-4 display-4">Mansion Dashboard</h2>
     <table class="table">
-                <thead class="thead-dark">
-                <tr>
-                    <th scope="col">Mansion Name</th>
-                    <th scope="col">Mansion Adresse</th>
-                    <th scope="col">Room Number</th>
-                    <th scope="col">Action</th>
-                </tr>
-                </thead>
-                <tbody>`
-    
-                for (let i = 0; i < mansion.length; i++) {
-                    if (mansion[i].ownerId == connectedUser) {
-                   
-                        addroom = addroom + 
-    
-                        `<tr>
-                        <th scope="row">${mansion[i].mansionName}</th>
-                        <td>${mansion[i].mansionAdresse}</td>
-                        <td>${mansion[i].roomNumbers}</td>
-                        <td><button type="button" class="btn btn-success" onclick = addRooms(${mansion[i].mansionId})>Modify</button></td>
-                      </tr>`
-                      
-                    }  
-                }
-                     addroom = addroom + `
-                            </tbody>
-                             </table>
-                                        `
-    
-        document.getElementById('v-pills-messages').innerHTML = addroom;
-    
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Mansion Name</th>
+                <th scope="col">Mansion Address</th>
+                <th scope="col">Room Number</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    for (let i = 0; i < mansion.length; i++) {
+        if (mansion[i].ownerId == connectedUser) {
+            addroom += `
+            <tr>
+                <td>${mansion[i].mansionName}</td>
+                <td>${mansion[i].mansionAdresse}</td>
+                <td>${mansion[i].roomNumbers}</td>
+                <td><button type="button" class="btn btn-success" onclick="addRooms(${mansion[i].mansionId})">Modify</button></td>
+            </tr>`;
+        }
+    }
+    addroom += `
+        </tbody>
+    </table>`;
+
+    // Update the dashboard container
+    document.getElementById('dashboardContainer').innerHTML = addroom;
 }
 
+
 function dashboardRooms() {
-    // Fetch data from local storage
     var mansions = getFromLocalStorage("mansions");
     var connectedUser = getFromLocalStorage("connectedUser");
     var roomsKey = getFromLocalStorage("roomsKey");
 
-    console.log("Mansions:", mansions); // Log mansions
-    console.log("Connected User:", connectedUser); // Log connected user
-    console.log("Rooms:", roomsKey); // Log rooms
-
-    // Start building the table HTML
     var addroom = `
-        <h2 class="text-center my-4 display-4">Rooms Dashboard</h2>
-        <table class="table">
-            <thead class="thead-dark">
-                <tr>
-                    <th scope="col">Room Name</th>
-                    <th scope="col">Room Capacity</th>
-                    <th scope="col">Price</th>
-                    <th scope="col" class="text-center" >Actions</th>
-                </tr>
-            </thead>
-            <tbody>`;
+    <h2 class="text-center my-4 display-4">Rooms Dashboard</h2>
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Room Name</th>
+                <th scope="col">Room Capacity</th>
+                <th scope="col">Price</th>
+                <th scope="col" class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>`;
 
-    // Iterate through all rooms
     for (let i = 0; i < roomsKey.length; i++) {
-        // Find the mansion associated with this room
         var mansion = mansions.find(m => m.mansionId == roomsKey[i].mansionId);
-        // Check if the mansion is owned by the connected user
-        if (mansion && mansion.ownerId == connectedUser) {   
-            // Add the room to the table
+        if (mansion && mansion.ownerId == connectedUser) {
             addroom += `
-                <tr>
-                    <th scope="row">${roomsKey[i].roomName}</th>
-                    <td>${roomsKey[i].capacity}</td>
-                    <td>${roomsKey[i].price}</td>
-                    <td class="text-center">
-                    
+            <tr>
+                <td>${roomsKey[i].roomName}</td>
+                <td>${roomsKey[i].capacity}</td>
+                <td>${roomsKey[i].price}</td>
+                <td class="text-center">
                     <button type="button" class="btn btn-success" onclick="addRooms()">Modify</button>
-   
                     <button type="button" class="btn btn-danger" onclick="deleteRoom(${roomsKey[i].roomId})">Delete</button>
-              
-                    
-                    </td>
-                </tr>`;
-        } else {   
+                </td>
+            </tr>`;
         }
     }
-    // Close the table
     addroom += `
-            </tbody>
-        </table>`;
+        </tbody>
+    </table>`;
 
-    // Update the roomsdashboard div with the generated table
-    document.getElementById('roomsdashboard').innerHTML = addroom;
+    // Update the dashboard container
+    document.getElementById('dashboardContainer').innerHTML = addroom;
 }
+
+
+function ownersDashboard() {
+    var users = getFromLocalStorage("users");
+
+    var owners = `
+    <h2 class="text-center my-4 display-4">Owners Table</h2>
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Owner Name</th>
+                <th scope="col">Owner Email</th>
+                <th scope="col">Owner Tel Number</th>
+                <th scope="col" class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    for (let i = 0; i < users.length; i++) {
+        if (users[i].role == "Owner" && users[i].statue == "wait") {
+            owners += `
+            <tr>
+                <td>${users[i].firstName}</td>
+                <td>${users[i].email}</td>
+                <td>${users[i].tel}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-success" onclick="acceptOwner(${users[i].id})">Accept</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteOwner(${users[i].id})">Delete</button>
+                </td>
+            </tr>`;
+        }
+    }
+    owners += `
+        </tbody>
+    </table>`;
+
+    // Update the dashboard container
+    document.getElementById('dashboardAdmin').innerHTML = owners;
+}
+
+function acceptOwner(id) {
+
+    // LS
+
+    var users = getFromLocalStorage("users");
+
+    // recherche ID
+    for (let i = 0; i < users.length; i++) {
+        if (users[i].id == id) {
+            if (users[i].statue == "wait") {
+                // Update the status
+                users[i].statue = "Confirmed";
+                localStorage.setItem("users", JSON.stringify(users));
+                alert("Owner has been confirmed!");
+            } else {
+                alert("Owner is already confirmed");
+            }
+            break;
+        }
+    }
+    location.reload();
+}
+
+
+function Logout() {
+
+    // supprimer key ConnectedUser :
+    
+    localStorage.removeItem("connectedUser")
+    
+    location.replace("login.html")
+    
+    }

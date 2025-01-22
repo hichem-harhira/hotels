@@ -847,7 +847,7 @@ function confirmOrder(id) {
     location.reload();
 }
 
-
+// modify
 function editProfileInformation(){
 
 var users = getFromLocalStorage("users");

@@ -7,7 +7,7 @@
     <meta name="keywords" content="Sona, unica, creative, html">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Mansion</title>
+    <title>Daashboard Admin</title>
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css?family=Lora:400,700&display=swap" rel="stylesheet">
@@ -145,77 +145,21 @@
             <div class="row">
                 <div class="col-3">
                   <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                    <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">Add Mansion</a>
-                    <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-controls="v-pills-profile" aria-selected="false">Add Rooms</a>
-      <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-messages" role="tab" aria-controls="v-pills-messages" aria-selected="false">Dashboard</a>
+                    <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">New Owners</a>
+                    <!-- <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-controls="v-pills-profile" aria-selected="false">Add Rooms</a>
+      <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-messages" role="tab" aria-controls="v-pills-messages" aria-selected="false">Dashboard</a> -->
 
                   </div>
                 </div>
 
                 <div class="col-9">
                   <div class="tab-content" id="v-pills-tabContent">
-                    <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
-                        <div class="row login_form" id="contactForm" novalidate="novalidate">
-
-							<div class="col-md-12 form-group">
-								<input type="text" class="form-control" id="mansionName" name="name" placeholder="Mansion Name" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Mansion Name'">
-							<span id="mansionNameError"></span>
-							</div>
-							<div class="col-md-12 form-group">
-								<input type="text" class="form-control" id="mansionAdresse" name="name" placeholder="Adresse Complete" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Adresse Complete'">
-							<span id="mansionAdresseError"></span>
-							</div>
-							<div class="col-md-12 form-group">
-								<input type="text" class="form-control" id="ville" name="name" placeholder="Ville" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Ville'">
-								<span id="villeError"></span>
-							</div>
-							<div class="col-md-12 form-group">
-								<input type="text" class="form-control" id="codePostal" name="name" placeholder="Code Postal" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Code Postal'">
-							<span id="codePostalError"></span>
-							</div>
-							<div class="col-md-12 form-group">
-								<input type="text" class="form-control" id="roomNumbers" name="name" placeholder="Please insert the room numbers ( max 5 )" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Please insert the room numbers ( max 5 )'">
-							<span id="roomNumbersError"></span>
-							</div>
-							<div class="col-md-12 form-group">
-								<input type="text" class="form-control" id="serviceInclus" name="name" placeholder="Service inclus" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Service inclus'">
-							<span id="serviceInclusError"></span>
-							</div>
-                    
-							<div class="col-md-12 form-group" style="margin-left: 400px;">
-								<button type="submit" value="submit" class="btn btn-outline-success" onclick="AddMansion()">Add Mansion</button>
-							</div>
-						</div>          
+                    <div class="tab-pane fade show active" id="dashboardAdmin" role="tabpanel" aria-labelledby="v-pills-home-tab">
+        <script>
+             ownersDashboard();
+        </script>
+                        </div>              
                         </div>
-                        <!--  tab 1 rooms -->
-                        <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
-                     <script>
-                         rooms ();
-                     </script>
-                        </div>
-
-                     <!--  tab 2 dashboard mansion -->
-                        
-                        <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
-                         <!-- <script>
-                            dashboardMansion();
-                         </script> -->
-                     <!-- tab3 dachboard rooms -->                 
-                         <!-- <div id="roomsdashboard">
-                         <script>
-                           dashboardRooms();
-                          </script> -->
-
-                          <div class="container my-5 text-center">
-                            <!-- Buttons stay here -->
-                            <button id="btnMansions" class="btn btn-primary btn-lg mx-3" onclick="dashboardMansion()">My Mansions</button>
-                            <button id="btnRooms" class="btn btn-secondary btn-lg mx-3" onclick="dashboardRooms()">My Rooms</button>
-                        </div>
-                        
-                        <!-- Dashboards display here -->
-                        <div id="dashboardContainer" class="my-4"></div>
-                        
-                          </div>
                         </div>
                   </div>
                 </div>
