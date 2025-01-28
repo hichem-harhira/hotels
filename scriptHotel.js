@@ -236,7 +236,7 @@ function navbarSupportedContent() {
                                 <ul>
                                    
                                     <li><a href="./home.html">Home</a></li>
-                                    <li><a href="./rooms.html">Rooms</a></li>
+                                    <li><a href="./roomsPalace.html">Rooms</a></li>
                                     <li><a href="./sign.html">Check Reserved </a></li>          
                                     <li><a href="./blog.html">News</a></li>
                                     <li><a href="./contact.html">Contact</a></li>
@@ -339,6 +339,7 @@ var mansion = {
     ownerId: owner.id,
     mansionName: mansionName,
     mansionAdresse: mansionAdresse,
+    mansionVille : ville,
     codePostal: codePostal,
     roomNumbers: roomNumbers,
     serviceInclus : serviceInclus
@@ -607,7 +608,7 @@ function validatePriceInput(price) {
 }
 
 function dashboardMansion() {
-    var mansion = getFromLocalStorage("mansions");
+    var mansions = getFromLocalStorage("mansions");
     var connectedUser = getFromLocalStorage("connectedUser");
 
     var addroom = `
@@ -623,14 +624,17 @@ function dashboardMansion() {
         </thead>
         <tbody>`;
 
-    for (let i = 0; i < mansion.length; i++) {
-        if (mansion[i].ownerId == connectedUser) {
+    for (let i = 0; i < mansions.length; i++) {
+        if (mansions[i].ownerId == connectedUser) {
             addroom += `
             <tr>
-                <td>${mansion[i].mansionName}</td>
-                <td>${mansion[i].mansionAdresse}</td>
-                <td>${mansion[i].roomNumbers}</td>
-                <td><button type="button" class="btn btn-success" onclick="addRooms(${mansion[i].mansionId})">Modify</button></td>
+                <td>${mansions[i].mansionName}</td>
+                <td>${mansions[i].mansionAdresse}</td>
+                <td>${mansions[i].roomNumbers}</td>
+                <td><button type="button" class="btn btn-success" onclick="modifMansion(${mansions[i].mansionId})">Modify</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteMansion(${mansions[i].mansionId})">Delete</button>
+             </td>
+                
             </tr>`;
         }
     }
@@ -642,6 +646,150 @@ function dashboardMansion() {
     document.getElementById('dashboardContainer').innerHTML = addroom;
 }
 
+
+function deleteMansion(id) {
+    // Retrieve the data from the correct key
+    var mansions = JSON.parse(localStorage.getItem("mansions") || "[]");
+
+    // Find the mansion to delete
+    for (let i = 0; i < mansions.length; i++) {
+        if (mansions[i].mansionId == id) {
+            mansions.splice(i, 1); // Remove the mansion at index i
+            break;
+        }
+    }
+
+    // Save the updated data back to the correct key
+    localStorage.setItem("mansions", JSON.stringify(mansions));
+
+    // Optionally reload the page
+    location.reload();
+}
+
+function modifMansion(id) {
+    console.log(id);
+    
+
+    var mansions = getFromLocalStorage("mansions");
+    var mansion;
+    for (let i = 0; i < mansions.length; i++) {
+
+        //  recuperer l'objet
+        
+        if (mansions[i].mansionId == id) {
+            mansion = mansions[i];
+            break;
+        }
+    
+    }
+    
+    var editMansion = `
+    
+                          <h3>Edit Mansion</h3>
+        <form>
+            <div class="mb-3">
+                <label for="mansionName" class="form-label">Mansion Name</label>
+                <input type="text" class="form-control" id="newmansionName" value="${mansion.mansionName}">
+                <span id="mansionNameError" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label for="mansionAdresse" class="form-label">Address</label>
+                <input type="text" class="form-control" id="newmansionAdresse" value="${mansion.mansionAdresse}">
+                <span id="mansionAdresseError" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label for="ville" class="form-label">City</label>
+                <input type="text" class="form-control" id="newville" value="${mansion.mansionVille}">
+                <span id="villeError" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label for="codePostal" class="form-label">Postal Code</label>
+                <input type="text" class="form-control" id="newcodePostal" value="${mansion.codePostal}">
+                <span id="codePostalError" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label for="roomNumbers" class="form-label">Number of Rooms</label>
+                <input type="text" class="form-control" id="newroomNumbers" value="${mansion.roomNumbers}">
+                <span id="roomNumbersError" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label for="serviceInclus" class="form-label">Included Services</label>
+                <input type="text" class="form-control" id="newserviceInclus" value="${mansion.serviceInclus}">
+                <span id="serviceInclusError" class="text-danger"></span>
+            </div>
+            <button type="button" class="btn btn-success" onclick="saveMansion(${mansion.mansionId})">Save</button>
+        </form>
+    
+    `;
+    
+    document.getElementById("editMansion").innerHTML=editMansion;
+
+
+    }
+
+function saveMansion(id) {
+
+    console.log("Mansion ID to Save:", id);
+
+    var mansions = getFromLocalStorage("mansions");
+
+    // Updated IDs
+    var newMansionNmae = document.getElementById("newmansionName").value;
+    var newmansionAdresse = document.getElementById("newmansionAdresse").value;
+    var newVille = document.getElementById("newville").value;
+    var newCodePostal = document.getElementById("newcodePostal").value;
+    var newroomNumber = document.getElementById("newroomNumbers").value;
+    var newserviceInclus = document.getElementById("newserviceInclus").value;
+
+    console.log("Input values before validation:");
+    console.log({
+        newMansionNmae,
+        newmansionAdresse,
+        newVille,
+        newCodePostal,
+        newroomNumber,
+        newserviceInclus,
+    });
+
+    let test = true; // Reset test to true before running validations
+
+    // Validate each input and log the result
+
+    const isMansionNameValid = validateMansionName(newMansionNmae);
+    const isMansionAdresseValid = validateMansionAdresse(newmansionAdresse);
+    const isVilleValid = validateVille(newVille);
+    const isCodePostalValid = validatecodePostal(newCodePostal);
+    const isRoomNumberValid = validateroomNumbers(newroomNumber);
+    const isServiceInclusValid = validateServiceInclus(newserviceInclus);
+
+
+    // Check if all validations passed
+    if (test) {
+
+        for (let i = 0; i < mansions.length; i++) {
+            if (mansions[i].mansionId == id) {
+                console.log("Updating Mansion:", mansions[i]);
+
+                mansions[i].mansionName = newMansionNmae;
+                mansions[i].mansionAdresse = newmansionAdresse;
+                mansions[i].mansionVille = newVille;
+                mansions[i].codePostal = newCodePostal;
+                mansions[i].roomNumbers = newroomNumber;
+                mansions[i].serviceInclus = newserviceInclus;
+
+               
+                break;
+            }
+        }
+
+        localStorage.setItem("mansions", JSON.stringify(mansions));
+       
+
+        location.reload();
+    } else {
+        console.log("Validation Failed");
+    }
+}
 
 function dashboardRooms() {
     var mansions = getFromLocalStorage("mansions");
@@ -670,8 +818,8 @@ function dashboardRooms() {
                 <td>${roomsKey[i].capacity}</td>
                 <td>${roomsKey[i].price}</td>
                 <td class="text-center">
-                    <button type="button" class="btn btn-success" onclick="addRooms()">Modify</button>
-                    <button type="button" class="btn btn-danger" onclick="deleteRoom(${roomsKey[i].roomId})">Delete</button>
+                    <button type="button" class="btn btn-success" onclick="addRooms(${roomsKey[i].idRoom })">Modify</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteRoom(${roomsKey[i].idRoom })">Delete</button>
                 </td>
             </tr>`;
         }
@@ -683,6 +831,35 @@ function dashboardRooms() {
     // Update the dashboard container
     document.getElementById('dashboardContainer').innerHTML = addroom;
 }
+
+function deleteRoom(id) {
+    console.log(id);
+    
+    // Retrieve the data from the correct key
+    var roomsKey = getFromLocalStorage("roomsKey");
+
+    // Check if roomsKey is null or empty
+    if (!roomsKey || roomsKey.length === 0) {
+        console.error("No rooms found in localStorage to delete.");
+        alert("No rooms available to delete.");
+        return; // Stop execution
+    }
+
+    // Find the room to delete
+    for (let i = 0; i < roomsKey.length; i++) {
+        if (roomsKey[i].idRoom == id) {
+            roomsKey.splice(i, 1); // Remove the room at index i
+            break;
+        }
+    }
+
+    // Save the updated data back to the correct key
+    localStorage.setItem("roomsKey", JSON.stringify(roomsKey));
+
+    // Reload the page or refresh the dashboard
+    // location.reload();
+}
+
 
 
 function ownersDashboard() {
@@ -710,7 +887,7 @@ function ownersDashboard() {
                 <td>${users[i].tel}</td>
                 <td class="text-center">
                     <button type="button" class="btn btn-success" onclick="acceptOwner(${users[i].id})">Accept</button>
-                    <button type="button" class="btn btn-danger" onclick="deleteOwner(${users[i].id})">Delete</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteUser(${users[i].id})">Delete</button>
                 </td>
             </tr>`;
         }
@@ -720,7 +897,7 @@ function ownersDashboard() {
     </table>`;
 
     // Update the dashboard container
-    document.getElementById('dashboardAdmin').innerHTML = owners;
+    document.getElementById('list-home').innerHTML = owners;
 }
 
 function acceptOwner(id) {
@@ -755,4 +932,253 @@ function Logout() {
     
     location.replace("login.html")
     
+}
+
+
+function userDashboard() {
+
+        var users = getFromLocalStorage("users");
+
+    
+        var userslist = `
+        <h2 class="text-center my-4 display-4">Users Table</h2>
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col"> Email</th>
+                    <th scope="col">Tel Number</th>
+                    <th scope="col" class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>`;
+    
+        for (let i = 0; i < users.length; i++) {
+            if (users[i].role !== 'Admin') {
+                userslist += `
+                <tr>
+                    <td>${users[i].firstName}</td>
+                    <td>${users[i].email}</td>
+                    <td>${users[i].tel}</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-danger" onclick="deleteUser(${users[i].id})">Delete</button>
+                    </td>
+                </tr>`;
+            }     
+        }
+        userslist += `
+            </tbody>
+        </table>`;
+        // Update the dashboard container
+        document.getElementById('list-profile').innerHTML = userslist;
+}
+
+
+
+function deleteUser(id) {
+
+ // Retrieve the data from the correct key
+ var users = getFromLocalStorage("users");
+
+ // Find the users to delete
+ for (let i = 0; i < users.length; i++) {
+     if (users[i].id == id) {
+        users.splice(i, 1); // Remove the user at index i
+         break;
+     }
+ }
+
+ // Save the updated data back to the correct key
+ localStorage.setItem("users", JSON.stringify(users));
+
+ // Optionally reload the page
+ location.reload();
+    
+}
+
+function mansionDashboard() {
+    var mansions = getFromLocalStorage("mansions");
+    var users = getFromLocalStorage("users");
+
+    var userslist = `
+    <h2 class="text-center my-4 display-4">Mansions Table</h2>
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Owner Name</th>
+                <th scope="col">Nb Rooms</th>
+                <th scope="col">Adresse</th>
+                <th scope="col" class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    for (let i = 0; i < mansions.length; i++) {
+        // Find owner by ID
+        var owner = searchById(users, mansions[i].ownerId);
+
+        // Check if owner exists and is not an Admin
+        if (owner && owner.role !== "Admin") {
+            userslist += `
+            <tr>
+                <td>${mansions[i].mansionName}</td>
+                <td>${owner.firstName}</td>
+                <td>${mansions[i].roomNumbers}</td>
+                <td>${mansions[i].mansionAdresse}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-danger" onclick="deleteUser(${mansions.id})">Delete</button>
+                </td>
+            </tr>`;
+        } else {
+            console.warn(`Owner not found for mansion: ${mansions[i].mansionName}`);
+        }
     }
+
+    userslist += `
+        </tbody>
+    </table>`;
+
+    // Update the dashboard container
+    document.getElementById("list-messages").innerHTML = userslist;
+}
+
+function roomsDashboard() {
+    var roomsKey = getFromLocalStorage("roomsKey");
+    var mansions = getFromLocalStorage("mansions");
+
+    console.log("Rooms Data:", roomsKey);
+    console.log("Mansions Data:", mansions);
+
+    var userslist = `
+    <h2 class="text-center my-4 display-4">Rooms Table</h2>
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Room Name</th>
+                <th scope="col">Mansion Name</th>
+                <th scope="col">Category</th>
+                <th scope="col">Price</th>
+                <th scope="col" class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    for (let i = 0; i < roomsKey.length; i++) {
+        // Log the mansionId of the room being processed
+        console.log("Checking room:", roomsKey[i].roomName, "with mansionId:", roomsKey[i].mansionId);
+
+        // Find the matching mansion directly - searchbyid didnt work:/
+        var mansion = null;
+        for (let j = 0; j < mansions.length; j++) {
+            if (mansions[j].mansionId == roomsKey[i].mansionId) {
+                mansion = mansions[j];
+                break;
+            }
+        }
+
+        if (mansion) {
+            // Mansion found; add room details to the table
+            userslist += `
+            <tr>
+                <td>${roomsKey[i].roomName}</td>
+                <td>${mansion.mansionName}</td>
+                <td>${roomsKey[i].categoryRoom}</td>
+                <td>${roomsKey[i].price}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-danger" onclick="deleteUser(${roomsKey[i].idRoom})">Delete</button>
+                </td>
+            </tr>`;
+        } else {
+            // Log a warning if a mansion is not found
+            console.warn(`Mansion not found for room: ${roomsKey[i].roomName} (Mansion ID: ${roomsKey[i].mansionId})`);
+        }
+    }
+
+    userslist += `
+        </tbody>
+    </table>`;
+
+    // Update the dashboard container
+    document.getElementById('list-settings').innerHTML = userslist;
+}
+
+
+function roomsPalace() {
+
+//  reuperer 
+
+var rooms = getFromLocalStorage("roomsKey");
+var mansions = getFromLocalStorage("mansions")
+
+var cart = "";
+
+for (let i = 0; i < rooms.length; i++) {
+
+    for (let j = 0; j < mansions.length; j++) {
+
+        if (mansions[j].mansionId == rooms[i].mansionId) {
+            mansion = mansions[j];
+            break;
+        }
+        
+    }
+if (mansion) {
+    
+    cart = cart + `
+<div class="col-lg-4 col-md-6">
+    <div class="room-item">
+        <img src="img/room/room-1.jpg" alt="">
+        <div class="ri-text">
+            <h4>${rooms[i].roomName}</h4>
+            <h3>${rooms[i].price}<span>/Pernight</span></h3>
+            <table>
+                <tbody>
+                    <tr>
+                        <td class="r-o">Capcity:</td>
+                        <td>${rooms[i].capacity}</td>
+                    </tr>
+                    <tr>
+                        <td class="r-o">Category:</td>
+                        <td>${rooms[i].categoryRoom}</td>
+                    </tr>
+                    <tr>
+                        <td class="r-o">Mansion :</td>
+                        <td>${mansion.mansionName}</td>
+                    </tr>
+                    <tr>
+                        <td class="r-o">Mansion Adresse:</td>
+                        <td>${mansion.mansionAdresse}</td>
+                    </tr>
+                    <tr>
+                        <td class="r-o">Services:</td>
+                        <td>${mansion.serviceInclus}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="button" class="btn btn-warning" onclick="reserveRoom(${rooms[i].idRoom})"}> Reserve ! </button>
+        </div>
+    </div>
+</div>
+`
+}
+console.log(rooms[i].id);
+}
+
+document.getElementById("roomList").innerHTML = cart;
+
+}
+
+
+
+function reserveRoom(id) {
+
+console.log(id);
+
+location.href ="reservingRoom.html"
+
+
+}
+
+
+

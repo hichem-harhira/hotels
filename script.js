@@ -803,9 +803,6 @@ function deleteOrder(id) {
         
     }
 
-
-
-
 for (let i = 0; i < products.length; i++) {
     if (products[i].id == order.idProduct) {
         products[i].stock = products[i].stock + Number(order.qty);
