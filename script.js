@@ -1089,7 +1089,9 @@ location.replace("search.html");
 
 }
 
-}  
+}
+
+
 
 function displaySearch() {
 

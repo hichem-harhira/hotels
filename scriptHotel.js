@@ -237,7 +237,7 @@ function navbarSupportedContent() {
                                    
                                     <li><a href="./home.html">Home</a></li>
                                     <li><a href="./roomsPalace.html">Rooms</a></li>
-                                    <li><a href="./sign.html">Check Reserved </a></li>          
+                                    <li><a href="./checkReserved.html">Check Reserved </a></li>          
                                     <li><a href="./blog.html">News</a></li>
                                     <li><a href="./contact.html">Contact</a></li>
                                     <li class="nav-item"><button type="button" class="btn btn-danger" onclick="Logout()"> Logout </button></li> 
@@ -251,8 +251,7 @@ function navbarSupportedContent() {
                                 <ul>
                                                             
                                     <li class="active"><a href="./home.html">Home</a></li>
-                                    <li><a href="./mansion.html">Add Mansion/Rooms</a></li>
-                                    <li><a href="./sign.html">Reserved Rooms</a></li>       
+                                    <li><a href="./mansion.html">Add Mansion/Rooms</a></li>         
                                     <li><a href="./blog.html">News</a></li>
                                     <li><a href="./contact.html">Contact</a></li>
                                     <li class="nav-item"><button type="button" class="btn btn-danger" onclick="Logout()"> Logout </button></li> 
@@ -474,10 +473,20 @@ function getMansionIdFromURL() {
     return params.get("mansionId");
 }
 
+function replaceCh(ch) {
 
+    var newCH = ch.replace(/[\\/]+/g, '/');
+    var path = newCH.replace("fakepath","/Users/CP9-Hich/Desktop/DEV/FSJS/Hotels/img/gallery")
+    
+    return path;
+    
+    
+    }
 
 function confirmRooms(id) {
 var mansionId = getMansionIdFromURL();
+console.log(mansionId);
+
 
 
     test = true;
@@ -489,7 +498,11 @@ var mansionId = getMansionIdFromURL();
         var descriptionRoom = document.getElementById("descriptionRoom").value;
         var price = document.getElementById("price").value;
         var categoryRoom = document.getElementById("category").value;
-    
+        var img = document.getElementById("roomImageUpload").value;
+        console.log(img);
+        var newImg = replaceCh(img);
+        console.log(newImg);
+        
     
         //  validate inputs :
     
@@ -524,7 +537,8 @@ var room = {
     capacity: capacity,
     descriptionRoom: descriptionRoom,
     price : price,
-    categoryRoom : categoryRoom
+    categoryRoom : categoryRoom,
+    img : newImg
 
 };
 
@@ -974,7 +988,6 @@ function userDashboard() {
 }
 
 
-
 function deleteUser(id) {
 
  // Retrieve the data from the correct key
@@ -1103,6 +1116,72 @@ function roomsDashboard() {
     document.getElementById('list-settings').innerHTML = userslist;
 }
 
+function reservedOwner() {
+    var roomsKey = getFromLocalStorage("roomsKey");
+    var mansions = getFromLocalStorage("mansions");
+    var reservations = getFromLocalStorage("reservations");
+    var connectedUser = getFromLocalStorage("connectedUser");
+
+    var reservationList = `
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Room Name</th>
+                <th scope="col">Mansion Name</th>
+                <th scope="col">Check In</th>
+                <th scope="col">Check Out</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    // Loop through mansions owned by the connected user
+    for (let i = 0; i < mansions.length; i++) {
+        if (mansions[i].ownerId == connectedUser) {
+            var mansion = mansions[i];
+           
+            
+
+            // Loop through rooms in the mansion
+            for (let j = 0; j < roomsKey.length; j++) {
+                if (roomsKey[j].mansionId == mansion.mansionId) {
+                    var room = roomsKey[j];
+                    console.log(room);
+                    
+                    
+
+                    // Find the reservation for this room
+                    var reserv = null;
+                    for (let s = 0; s < reservations.length; s++) {
+                        if (reservations[s].idRoom == room.idRoom) {
+                            reserv = reservations[s];
+                            console.log(reserv);
+                            
+                            break;
+                        }
+                    }
+
+                    // Add the reservation to the table if it exists
+                    if (reserv) {
+                        reservationList += `
+                        <tr>
+                            <td>${room.roomName}</td>
+                            <td>${mansion.mansionName}</td>
+                            <td>${reserv.checkIn}</td>
+                            <td>${reserv.checkOut}</td>
+                        </tr>`;
+                    }
+                }
+            }
+        }
+    }
+
+    reservationList += `
+        </tbody>
+    </table>`;
+
+    // Update the dashboard container
+    document.getElementById('reservationListOwner').innerHTML = reservationList;
+}
 
 function roomsPalace() {
 
@@ -1128,10 +1207,10 @@ if (mansion) {
     cart = cart + `
 <div class="col-lg-4 col-md-6">
     <div class="room-item">
-        <img src="img/room/room-1.jpg" alt="">
+        <img src=${rooms[i].img} alt="">
         <div class="ri-text">
             <h4>${rooms[i].roomName}</h4>
-            <h3>${rooms[i].price}<span>/Pernight</span></h3>
+            <h3>${rooms[i].price}$ <span>/Pernight</span></h3>
             <table>
                 <tbody>
                     <tr>
@@ -1156,29 +1235,412 @@ if (mansion) {
                     </tr>
                 </tbody>
             </table>
-            <button type="button" class="btn btn-warning" onclick="reserveRoom(${rooms[i].idRoom})"}> Reserve ! </button>
+            <button type="button" class="btn btn-warning" onclick="reserveRoomId(${rooms[i].idRoom})"}> Reserve ! </button>
         </div>
     </div>
 </div>
 `
 }
-console.log(rooms[i].id);
+
 }
 
 document.getElementById("roomList").innerHTML = cart;
 
 }
 
+function reserveRoomId(id) {
+    // Save the room ID to localStorage with the key 'reservedRoomId'
+    localStorage.setItem("reserveRoomId", JSON.stringify(id));
+
+    // Redirect to the next page (optional, depending on your flow)
+    window.location.href = "reservingRoom.html";
+}
 
 
-function reserveRoom(id) {
+function reservation() {
+    var rooms = getFromLocalStorage("roomsKey");
+    var reserveRoomId = JSON.parse(localStorage.getItem("reserveRoomId"));
+    var cart = "";
 
-console.log(id);
+    for (let i = 0; i < rooms.length; i++) {
+        // Compare the room's ID with the reserved ID
+        if (rooms[i].idRoom == reserveRoomId) {
+            cart = `
+                <h3 style="margin-bottom: 10px;">${rooms[i].roomName}</h3>
+                <h2>${rooms[i].price} $<span>/Pernight</span></h2>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="r-o">Size:</td>
+                            <td>${rooms[i].categoryRoom}</td>
+                        </tr>
+                        <tr>
+                            <td class="r-o">Capacity:</td>
+                            <td>${rooms[i].capacity}</td>
+                        </tr>
+                        <tr>
+                            <td class="r-o">Services:</td>
+                            <td>${rooms[i].descriptionRoom}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+        }
+    }
 
-location.href ="reservingRoom.html"
+    // Set the inner HTML to display the cart content
+    document.getElementById("reservedroom").innerHTML = cart;
+}
 
+
+function reserve() {
+    // Step 1: Get the logged-in user
+    var connectedUser = getFromLocalStorage("connectedUser")
+    var roomsKey = getFromLocalStorage("roomsKey")
+    console.log("Connected User:", connectedUser);
+
+    // Step 2: Get the check-in and check-out dates from the input fields
+    var checkIn = document.getElementById("date-in").value;
+    var checkOut = document.getElementById("date-out").value;
+    var capacity = document.getElementById("capacity").value;
+
+
+    // Step 3: Convert the dates to milliseconds for easier comparison
+    var checkInMs = new Date(checkIn).getTime();
+    var checkOutMs = new Date(checkOut).getTime();
+
+    console.log("Check-in:", checkIn, "=>", checkInMs);
+    console.log("Check-out:", checkOut, "=>", checkOutMs);
+
+    // Step 4: Check if the check-out date is after the check-in date / Capcity Error
+    var reserveRoomId = JSON.parse(localStorage.getItem("reserveRoomId"));
+
+    if (checkOutMs <= checkInMs) {
+        document.getElementById("resererror").innerHTML = "Invalid date range";
+        document.getElementById("resererror").style.color = "red";
+        return; // Stop the function if the dates are invalid
+    }
+
+    for (let i = 0; i < roomsKey.length; i++) {
+        if (roomsKey[i].idRoom == reserveRoomId) {
+            var room = roomsKey[i];
+    
+            // Check if the room's capacity is less than the desired capacity
+            if (room.capacity < capacity) {
+                document.getElementById("resererror").innerHTML = "Invalid Capacity: The room is too small.";
+                document.getElementById("resererror").style.color = "red";
+                return; // Stop the function if the room is too small
+            }
+        }
+    }
+
+    // Step 5: Get the selected room from localStorage
+    var roomsKey = getFromLocalStorage("roomsKey");
+    var reserveRoomId = JSON.parse(localStorage.getItem("reserveRoomId"));
+
+    console.log(roomsKey);
+    console.log(reserveRoomId);
+
+
+    // Step 6: Find the room in the list of rooms
+    var roomFound = roomsKey.find(roomsKey => roomsKey.idRoom == reserveRoomId);
+
+    if (!roomFound) {
+        console.log("Room not found.");
+        return; // Stop the function if the room is not found
+    }
+
+    // Step 7: Check if the room is already reserved during the selected dates
+    var reservations = JSON.parse(localStorage.getItem("reservations") || "[]");
+    var isAvailable = true;
+
+    for (var i = 0; i < reservations.length; i++) {
+        var reservation = reservations[i];
+        if (reservation.idRoom == reserveRoomId) {
+            var resCheckIn = new Date(reservation.checkIn).getTime();
+            var resCheckOut = new Date(reservation.checkOut).getTime();
+
+            // Check if the new reservation overlaps with an existing one
+            if (!(checkOutMs <= resCheckIn || checkInMs >= resCheckOut)) {
+                isAvailable = false;
+                break;
+            }
+        }
+    }
+
+    if (!isAvailable) {
+        document.getElementById("resererror").innerHTML = "Room is already reserved";
+        document.getElementById("resererror").style.color = "red";
+        return; // Stop the function if the room is not available
+    }
+
+    // Step 8: Create a new reservation
+    var idReserv = JSON.parse(localStorage.getItem("idReserv") || "10");
+    var newReservation = {
+        id: idReserv,
+        idRoom: reserveRoomId,
+        idUser: connectedUser,
+        checkIn: checkIn,
+        checkOut: checkOut,
+        capacity : capacity
+    };
+
+    // Step 9: Add the new reservation to the list and save it in localStorage
+    reservations.push(newReservation);
+    localStorage.setItem("reservations", JSON.stringify(reservations));
+    localStorage.setItem("idReserv", JSON.stringify(idReserv + 1));
+
+    console.log("Reservation added:", newReservation);
+}
+
+function reservationDashboard() {
+    var roomsKey = getFromLocalStorage("roomsKey");
+    var mansions = getFromLocalStorage("mansions");
+    var reservations = getFromLocalStorage("reservations");
+    var users = getFromLocalStorage("users");
+
+    console.log("Rooms Data:", roomsKey);
+    console.log("Mansions Data:", mansions);
+
+    var userslist = `
+    <h2 class="text-center my-4 display-4">All reservations</h2>
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Room Name</th>
+                <th scope="col">Mansion Name</th>
+                <th scope="col">User Name</th>
+                <th scope="col">Check in</th>
+                <th scope="col">Check Out</th>
+                <th scope="col" class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    for (let i = 0; i < reservations.length; i++) {
+        var room = null;
+        var mansion = null;
+        var user = null;
+
+        // Find the matching room and mansion
+        for (let j = 0; j < roomsKey.length; j++) {
+            if (reservations[i].idRoom == roomsKey[j].idRoom) {
+                room = roomsKey[j];
+                for (let k = 0; k < mansions.length; k++) {
+                    if (roomsKey[j].mansionId == mansions[k].mansionId) {
+                        mansion = mansions[k];
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+
+        // Find the matching user
+        for (let s = 0; s < users.length; s++) {
+            if (reservations[i].idUser == users[s].id) {
+                user = users[s];
+                break;
+            }
+        }
+
+        if (room && mansion && user) {
+            // Room, mansion, and user found; add reservation details to the table
+            userslist += `
+            <tr>
+                <td>${room.roomName}</td>
+                <td>${mansion.mansionName}</td>
+                <td>${user.firstName}</td>
+                <td>${reservations[i].checkIn}</td>
+                <td>${reservations[i].checkOut}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-danger" onclick="deleteUser(${reservations[i].id})">Delete</button>
+                </td>
+            </tr>`;
+        } else {
+            // Log a warning if a reservation is not fully resolved
+            console.warn(`Incomplete reservation data for reservation ID: ${reservations[i].id}`);
+        }
+    }
+
+    userslist += `
+        </tbody>
+    </table>`;
+
+    // Update the dashboard container
+    document.getElementById('list-notifications').innerHTML = userslist;
+}
+
+function calculateNumberOfDays(checkIn, checkOut) {
+    // Convert the date strings to Date objects
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+
+    // Calculate the difference in milliseconds
+    const timeDifference = checkOutDate - checkInDate;
+
+    // Convert the difference from milliseconds to days
+    const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
+
+    return daysDifference;
+}
+
+function allReservationUser() {
+    var mansions = getFromLocalStorage("mansions");
+    var connectedUser = getFromLocalStorage("connectedUser");
+    var roomsKey = getFromLocalStorage("roomsKey");
+    var reservations = getFromLocalStorage("reservations")
+
+    var addroom = `
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Room Name</th>
+                <th scope="col">Mansion Name</th>
+                <th scope="col">Check In</th>
+                <th scope="col">Check Out</th>
+                <th scope="col">Price</th>
+                <th scope="col">Total</th>
+                <th scope="col" class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>`;
+//  looking for reservation related to connected User :
+
+        for (let i = 0; i < reservations.length; i++) {
+            if (reservations[i].idUser == connectedUser) {
+                var reservation = reservations[i];
+                     
+    
+                // Loop through rooms in the mansion
+                for (let j = 0; j < roomsKey.length; j++) {
+                    if (roomsKey[j].idRoom == reservation.idRoom) {
+                        var room = roomsKey[j];
+                        console.log(room);
+                        
+                
+                        for (let s = 0; s < reservations.length; s++) {
+                            if (mansions[s].mansionId == room.mansionId) {
+                                var mansion = mansions[s];
+                                console.log(mansion);
+                                
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (reservation && mansion) {
+                    addroom += `
+                    <tr>
+                        <td>${room.roomName}</td>
+                        <td>${mansion.mansionName}</td>
+                        <td>${reservation.checkIn}</td>
+                        <td>${reservation.checkOut}</td>
+                        <td>${room.price} $</td>
+                        <td>${calculateNumberOfDays(reservation.checkIn, reservation.checkOut) * room.price} $</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-danger" onclick="deleteRoom(${reservation.id })">Delete</button>
+                        </td>
+                    </tr>`;
+                } 
+            }
+        }
+            
+        
+    addroom += `
+        </tbody>
+    </table>`;
+
+    // Update the dashboard container
+    document.getElementById('allReeservationUser').innerHTML = addroom;
 
 }
+
+function searchRooms(event) {
+
+var code = event.keyCode;
+console.log(code);
+
+if (code == 13 ) {
+    
+//  recuperer la category
+
+var roomSearch = document.getElementById("search_input").value;
+console.log(roomSearch);
+
+// sauvgarder la acategory dans LS
+localStorage.setItem("roomSearch",roomSearch)
+
+// NAVIGATION VER LA PAGE SEARCH 
+location.replace("search.html");
+
+}
+
+}
+
+function displaySearch() {
+    var roomsKey = getFromLocalStorage("roomsKey") || []; // Get rooms safely
+    var roomSearch = localStorage.getItem("roomSearch") || "";
+    var mansions = getFromLocalStorage("mansions") || []; // Get mansions safely
+    var cart = "";
+
+    // Convert search query to lowercase for better matching
+    roomSearch = roomSearch.toLowerCase();
+
+    for (let i = 0; i < roomsKey.length; i++) {
+        // Find the associated mansion
+        let mansion = mansions.find(m => m.mansionId == roomsKey[i].mansionId) || {};
+
+        // Check if the room name contains the search term
+        if (roomsKey[i].roomName.toLowerCase().includes(roomSearch)) {
+            cart += `<div class="col-lg-4 col-md-6">
+                <div class="room-item">
+                    <img src="${roomsKey[i].img}" alt="">
+                    <div class="ri-text">
+                        <h4>${roomsKey[i].roomName}</h4>
+                        <h3>${roomsKey[i].price}$ <span>/Pernight</span></h3>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="r-o">Capacity:</td>
+                                    <td>${roomsKey[i].capacity}</td>
+                                </tr>
+                                <tr>
+                                    <td class="r-o">Category:</td>
+                                    <td>${roomsKey[i].categoryRoom}</td>
+                                </tr>
+                                <tr>
+                                    <td class="r-o">Mansion:</td>
+                                    <td>${mansion.mansionName || "N/A"}</td>
+                                </tr>
+                                <tr>
+                                    <td class="r-o">Mansion Address:</td>
+                                    <td>${mansion.mansionAdresse || "N/A"}</td>
+                                </tr>
+                                <tr>
+                                    <td class="r-o">Services:</td>
+                                    <td>${mansion.serviceInclus || "N/A"}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-warning" onclick="reserveRoomId(${roomsKey[i].idRoom})"> Reserve! </button>
+                    </div>
+                </div>
+            </div>`;
+        }
+    }
+
+    if (cart === "") {
+        cart = "<p>No matching rooms found.</p>";
+    }
+
+    document.getElementById("searchList").innerHTML = cart;
+}
+
+
+
+
+
 
 
 

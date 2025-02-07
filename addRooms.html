@@ -176,6 +176,19 @@
 
                             <div class="col-md-12 form-group">
 
+                                <input 
+                                  type="file" 
+                                  class="form-control" 
+                                  id="roomImageUpload" 
+                                  accept="image/*" 
+                                  onblur="this.placeholder = 'Upload Room Image'"
+                                  placeholder="Upload Room Image"
+                                >
+                                <span id="imageError"></span>
+                              </div>
+
+                            <div class="col-md-12 form-group">
+
                                 <label for="category" style="color: chocolate;"></label >
     
                                 <select name="Category" id="category" style="color: chocolate;">

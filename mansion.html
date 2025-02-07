@@ -147,7 +147,8 @@
                   <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                     <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">Add Mansion</a>
                     <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-controls="v-pills-profile" aria-selected="false">Add Rooms</a>
-      <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-messages" role="tab" aria-controls="v-pills-messages" aria-selected="false">Dashboard</a>
+                      <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-messages" role="tab" aria-controls="v-pills-messages" aria-selected="false">Dashboard</a>
+                        <a class="nav-link" id="v-pills-content-tab" data-toggle="pill" href="#v-pills-content" role="tab" aria-controls="v-pills-content" aria-selected="false">All reservations</a>
 
                   </div>
                 </div>
@@ -156,7 +157,7 @@
                   <div class="tab-content" id="v-pills-tabContent">
                     <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
                         <div class="row login_form" id="contactForm" novalidate="novalidate">
-
+                            <h2>Add You Mansion Details</h2>
 							<div class="col-md-12 form-group">
 								<input type="text" class="form-control" id="mansionName" name="name" placeholder="Mansion Name" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Mansion Name'">
 							<span id="mansionNameError"></span>
@@ -197,15 +198,7 @@
                      <!--  tab 2 dashboard mansion -->
                         
                         <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
-                         <!-- <script>
-                            dashboardMansion();
-                         </script> -->
-                     <!-- tab3 dachboard rooms -->                 
-                         <!-- <div id="roomsdashboard">
-                         <script>
-                           dashboardRooms();
-                          </script> -->
-
+         
                           <div class="container my-5 text-center">
                             <!-- Buttons stay here -->
                             <button id="btnMansions" class="btn btn-primary btn-lg mx-3" onclick="dashboardMansion()">My Mansions</button>                   
@@ -219,6 +212,18 @@
                         <div id="dashboardContainer" class="my-4"></div>
                         
                           </div>
+                          <div class="tab-pane fade" id="v-pills-content" role="tabpanel" aria-labelledby="v-pills-content-tab">
+                            <!-- Content for Add Content -->
+                            <div class="container my-5 text-center ">
+                                <h2>You Reservations</h2>
+                                <div id="reservationListOwner">
+                                    <script>
+                                        reservedOwner();
+                                    </script>
+                                </div>
+                                
+                                <!-- Add your form or other elements here -->
+                            </div>
                         </div>
                   </div>
                 </div>
